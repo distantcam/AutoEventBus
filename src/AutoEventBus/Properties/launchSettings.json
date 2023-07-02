@@ -1,0 +1,8 @@
+{
+    "profiles": {
+        "AutoEventBus Debug": {
+            "commandName": "DebugRoslynComponent",
+            "targetProject": "..\\AutoEventBus.Debug\\AutoEventBus.Debug.csproj"
+        }
+    }
+}
