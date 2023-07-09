@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using System.Drawing;
+using AutoSource;
 using Microsoft.CodeAnalysis;
 
 namespace AutoEventBus;
@@ -7,11 +7,21 @@ namespace AutoEventBus;
 [Generator(LanguageNames.CSharp)]
 public class BusSourceGenerator : IIncrementalGenerator
 {
+    private static readonly SymbolDisplayFormat HintSymbolDisplayFormat = new SymbolDisplayFormat(
+        globalNamespaceStyle:
+            SymbolDisplayGlobalNamespaceStyle.Omitted,
+        typeQualificationStyle:
+            SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        genericsOptions:
+            SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions:
+            SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var methods = context.SyntaxProvider.CreateSyntaxProvider(
-            static (s, ct) => GeneratorUtilities.IsCorrectAttribute("Subscriber", s, ct),
-            GeneratorUtilities.GetMethodFromAttribute)
+            static (s, ct) => SourceTools.IsCorrectAttribute("Subscriber", s, ct),
+            SourceTools.GetMethodFromAttribute)
             .Where(x => x != null)
             .Collect();
 
@@ -60,14 +70,14 @@ public class BusSourceGenerator : IIncrementalGenerator
 
             source.EndBlock(); // EventBus
 
-            var hintName = type.ToDisplayString(GeneratorUtilities.HintSymbolDisplayFormat)
+            var hintName = type.ToDisplayString(HintSymbolDisplayFormat)
                 .Replace('<', '[')
                 .Replace('>', ']');
 
             context.AddSource($"EventBus_{hintName}.g.cs", source);
         }
 
-        foreach (var methodGroup in methods.GroupBy(m => m?.Parameters.JoinString(format: GeneratorUtilities.FullyQualifiedParameterFormat)))
+        foreach (var methodGroup in methods.GroupBy(m => m?.Parameters.JoinString(format: SourceDisplayFormats.FullyQualifiedParameterFormat)))
         {
             if (methodGroup == null || methodGroup.Key == null || !methodGroup.Any())
                 continue;
@@ -81,7 +91,7 @@ public class BusSourceGenerator : IIncrementalGenerator
 
             var parameters = methodGroup.First()!.Parameters;
 
-            source.AppendLine($"public static void Send({parameters.JoinString(format: GeneratorUtilities.FullyQualifiedParameterFormat)})");
+            source.AppendLine($"public static void Send({parameters.JoinString(format: SourceDisplayFormats.FullyQualifiedParameterFormat)})");
             source.StartBlock();
             foreach (var methodTypeGroup in methodGroup.GroupBy(m => "_subList_" + m!.ContainingType.Name))
             {
@@ -89,11 +99,11 @@ public class BusSourceGenerator : IIncrementalGenerator
 
                 source.AppendLine($"lock ({methodTypeGroup.Key})");
                 source.StartBlock();
-                source.AppendPragma("#if NET5_0_OR_GREATER");
+                source.AppendLineNoIndent("#if NET5_0_OR_GREATER");
                 source.AppendLine($"foreach (var receiver in System.Runtime.InteropServices.CollectionsMarshal.AsSpan({methodTypeGroup.Key}))");
-                source.AppendPragma("#else");
+                source.AppendLineNoIndent("#else");
                 source.AppendLine($"foreach (var receiver in {methodTypeGroup.Key})");
-                source.AppendPragma("#endif");
+                source.AppendLineNoIndent("#endif");
                 source.StartBlock();
                 foreach (var method in methodTypeGroup)
                 {

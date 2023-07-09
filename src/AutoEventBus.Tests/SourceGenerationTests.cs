@@ -80,7 +80,8 @@ public class SourceGenerationTests
         var references = AppDomain.CurrentDomain.GetAssemblies()
             .Where(assembly => !assembly.IsDynamic)
             .Select(assembly => MetadataReference.CreateFromFile(assembly.Location))
-            .Cast<MetadataReference>();
+            .Cast<MetadataReference>()
+            .Concat(new[] { MetadataReference.CreateFromFile(Path.Combine(Environment.CurrentDirectory, "AutoEventBus.Attributes.dll")) });
 
         return CSharpCompilation.Create(
             nameof(AutoEventBus) + "Test",

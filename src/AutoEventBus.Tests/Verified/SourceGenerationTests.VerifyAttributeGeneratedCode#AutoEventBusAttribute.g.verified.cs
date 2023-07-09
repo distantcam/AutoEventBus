@@ -11,15 +11,16 @@
 #if AUTOEVENTBUS_EMBED_ATTRIBUTES
 namespace AutoEventBus
 {
-	[System.Runtime.CompilerServices.CompilerGenerated]
-	[System.AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
-	[System.Diagnostics.Conditional(""AUTOEVENTBUS_USAGES"")]
-	internal sealed class SubscriberAttribute : System.Attribute
-	{
-		[System.Runtime.CompilerServices.CompilerGenerated]
-		public AutoConstructAttribute()
-		{
-		}
-	}
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("AutoEventBus", "0.0.0")]
+    [global::System.AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
+    [global::System.Diagnostics.Conditional("AUTOEVENTBUS_USAGES")]
+    internal sealed class SubscriberAttribute : System.Attribute
+    {
+        [global::System.Runtime.CompilerServices.CompilerGenerated]
+        public SubscriberAttribute()
+        {
+        }
+    }
 }
 #endif
